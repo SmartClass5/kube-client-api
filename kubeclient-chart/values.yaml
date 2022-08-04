@@ -1,0 +1,20 @@
+# Default values for front-app.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  name: 'kube-client-api'
+  namespace: 'smartclass'
+
+replicas:
+  count: 1
+  revisionHistoryLimit: 0
+
+image:
+  version: main-d162c23
+  repository: 142373294051.dkr.ecr.us-east-1.amazonaws.com/kube-client
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8080
