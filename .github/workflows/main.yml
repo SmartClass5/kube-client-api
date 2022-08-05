@@ -1,0 +1,74 @@
+name: CI & CD
+
+on:
+  push:
+    branches: [ "main" ]       
+  
+jobs:      
+  push_to_registry:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        
+      - name: Create .env file
+        run: |
+          jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' <<< "$NODE_ENV" > .env
+        env:
+          NODE_ENV: ${{ toJson(secrets) }}
+          
+      - name: Set Outputs
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - name: Configure AWS creddentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Login to ECR
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.ECR_REGISTRY }}
+          
+      - name: Build and push
+        uses: docker/build-push-action@v2 # build-push-action 사용
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ steps.extract_branch.outputs.branch }}-${{ steps.vars.outputs.sha_short }}
+            ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
+          cache-from: type=gha # 여기서 gha 는 Github Actions 용 캐시를 의미합니다.
+          cache-to: type=gha,mode=max
+          
+  deploy_to_k8s:
+    name: Edit deployment.yaml and values.yaml
+    needs: ["push_to_registry"]
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Update Version lms-site
+        run: |
+          git_hash=$(git rev-parse --short "$GITHUB_SHA")
+          echo git_hash
+          version=$(cat ${{ secrets.HELM_PATH }}/values.yaml | grep version: | awk '{print $2}')
+          sed -i "s/$version/${GITHUB_REF##*/}-$git_hash/" ${{ secrets.HELM_PATH }}/values.yaml
+          #sed -i "s/$repository/${{ secrets.REGISTRY }}/${{secrets.REPOSITORY}}/" ${{ secrets.HELM_PATH }}/values.yaml
+      - name: Commit and push changes
+        uses: devops-infra/action-commit-push@v0.3
+        with:
+          github_token: ${{ secrets.GIT_ACCESS_TOKEN }}
+          commit_message: Image version updated
