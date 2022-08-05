@@ -20,6 +20,10 @@ mongoose.connect(`${mongourl}`, {
 //  POST login요청이 들어오면 body에 id와 password를 실어서 요청으로 가정해서 jwt를발급해준다.
 app.use('/auth', Routers);
 
+app.get('/test', (req,res)=>{
+    return res.json({msg:"test"})
+});
+
 app.use((req, res, next) => {
     res.status(404).send('Not found')
 })
