@@ -2,12 +2,9 @@ const express = require("express");
 
 const router = express.Router();
 
-const LoginRouters = require('./login');
-const SignUpRouters = require('./sign-up');
-const PayloadRouters = require('./payload');
+const ClientRouters = require('./client');
 
-router.use('/login', LoginRouters);
-router.use('/sign-up', SignUpRouters);
-router.use('/payload', PayloadRouters);
+router.use('/client', ClientRouters);
+
 
 module.exports = router;
