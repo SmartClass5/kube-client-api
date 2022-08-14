@@ -11,7 +11,7 @@ replicas:
   revisionHistoryLimit: 0
 
 image:
-  version: main-5eb17b9
+  version: main-9c3f31f
   repository: 142373294051.dkr.ecr.us-east-1.amazonaws.com/kube-client
   pullPolicy: IfNotPresent
 
