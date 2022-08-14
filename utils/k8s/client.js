@@ -3,13 +3,38 @@ const config = require('../../config/config');
 const fs = require('fs');
 const randomstring = require("randomstring");
 
-// kubernetes 접속을 위한 config 파일 load
-const kc = new k8s.KubeConfig({
-    clusters: [config.cluster],
-    users: [config.user],
-    contexts: [config.context],
-    currentContext: config.context.name,
+
+const cluster = {
+    name: 'arn:aws:eks:us-east-1:142373294051:cluster/EKS-CDK6N09R',
+    server: 'https://FA30080C8C3A61FE7927518E3A4632EC.gr7.us-east-1.eks.amazonaws.com',
+};
+
+const user = {
+    name: 'arn:aws:iam::142373294051:user/aicore0480',
+    password: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IlVfUVFLQjFmY2U3T3ZYaExtUnFfQ20xZ0dUR3dWdkd6dW5jbWJjdGlRT0UifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tc2ZnNjgiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjEwZTY2NTZhLTI5YWQtNGRhNy05MjdiLWQ2NTA0YTAzNDE2NyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.FKWpjsKXBvbweVME11SvIiMIeEC2obofBmi_bgnEuZo1duF4pn4so_qnCVfp3SKMa6u69JzGyNRF5509enURAzqS1Hpg4UnhcJu1_8Vs-6sakG8KRuALTXZ6GM7-mbs2CShsZOQJb48eaEy1HKlhKecWWQX4kUcIrEJ5xoTFGwC21EJhD5VwxTQ82Yq7YV3SohdBf6rE5ahdE8YwSri4aWeMFDjR_PWjis6tZEEp1Dy2DdvhZUdIGCH2kL4nCLMMSmdqUEZ3LB0fScGK20APzhDOJOoT8dpshchDI3dCVGvCfzgGDbl5WYkxjJU1zNi-zF9aemGyJ5-3RKGEqXdC2w',
+};
+
+const context = {
+    name: 'arn:aws:eks:us-east-1:142373294051:cluster/EKS-CDK6N09R',
+    user: 'arn:aws:eks:us-east-1:142373294051:cluster/EKS-CDK6N09R',
+    cluster: 'arn:aws:eks:us-east-1:142373294051:cluster/EKS-CDK6N09R',
+};
+
+const kc = new k8s.KubeConfig();
+kc.loadFromOptions({
+    clusters: [cluster],
+    users: [user],
+    contexts: [context],
+    currentContext: context.name,
 });
+
+// // kubernetes 접속을 위한 config 파일 load
+// const kc = new k8s.KubeConfig({
+//     clusters: config.cluster,
+//     users: config.user,
+//     contexts: config.context,
+//     currentContext: config.context.name,
+// });
 kc.loadFromDefault();
 
 let k8sApi = {};
