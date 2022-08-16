@@ -20,21 +20,16 @@ const context = {
     cluster: 'arn:aws:eks:us-east-1:142373294051:cluster/EKS-CDK6N09R',
 };
 
-const kc = new k8s.KubeConfig();
-kc.loadFromOptions({
-    clusters: [cluster],
-    users: [user],
-    contexts: [context],
-    currentContext: context.name,
-});
+// const kc = new k8s.KubeConfig();
+// kc.loadFromOptions({
+//     clusters: [cluster],
+//     users: [user],
+//     contexts: [context],
+//     currentContext: context.name,
+// });
 
 // // kubernetes 접속을 위한 config 파일 load
-// const kc = new k8s.KubeConfig({
-//     clusters: config.cluster,
-//     users: config.user,
-//     contexts: config.context,
-//     currentContext: config.context.name,
-// });
+const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 
 let k8sApi = {};
